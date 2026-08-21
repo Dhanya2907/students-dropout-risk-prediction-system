@@ -15,15 +15,6 @@ LIGHT_GRAY = "#E2E8F0"
 GREEN = "#16A34A"
 ORANGE = "#EA580C"
 RED = "#DC2626"
-LIGHT_GREEN = "#DCFCE7"
-LIGHT_ORANGE = "#FFEDD5"
-LIGHT_RED = "#FEE2E2"
-root = tk.Tk()
-root.title("Smart Student Dropout Risk Prediction System")
-root.geometry("1200x750")
-root.minsize(1000, 650)
-root.configure(bg=BG)
-is_maximized = False
 student_id_entry = None
 student_name_entry = None
 attendance_entry = None
@@ -32,30 +23,30 @@ internal_entry = None
 assignment_entry = None
 gpa_entry = None
 backlog_entry = None
-
-student_list_tree = None
 student_dropdown = None
-
 prediction_result_frame = None
+maximize_button = None
+content = None
+is_maximized = False
+root = tk.Tk()
+root.title("Smart Student Dropout Risk Prediction System")
+root.geometry("1200x750")
+root.minsize(1000, 650)
+root.configure(bg=BG)
+
 def toggle_maximize():
 
     global is_maximized
 
     if is_maximized:
-
         root.state("normal")
         root.geometry("1200x750")
-
         is_maximized = False
-
         maximize_button.config(text="□")
 
     else:
-
         root.state("zoomed")
-
         is_maximized = True
-
         maximize_button.config(text="❐")
 
 
@@ -70,19 +61,11 @@ def exit_application():
         root.destroy()
 
 
-# ============================================================
-# CONTENT CLEAR
-# ============================================================
-
 def clear_content():
 
     for widget in content.winfo_children():
         widget.destroy()
 
-
-# ============================================================
-# EXCEL FILE
-# ============================================================
 
 def create_excel_file():
 
@@ -91,7 +74,6 @@ def create_excel_file():
         workbook = openpyxl.Workbook()
 
         sheet = workbook.active
-
         sheet.title = "Student Details"
 
         sheet.append([
@@ -106,19 +88,17 @@ def create_excel_file():
         ])
 
         workbook.save(FILE_NAME)
-
         workbook.close()
 
-
-# ============================================================
-# LOAD ALL STUDENTS
-# ============================================================
 
 def load_students():
 
     create_excel_file()
 
-    workbook = openpyxl.load_workbook(FILE_NAME)
+    workbook = openpyxl.load_workbook(
+        FILE_NAME,
+        data_only=True
+    )
 
     sheet = workbook.active
 
@@ -129,7 +109,10 @@ def load_students():
         values_only=True
     ):
 
-        if row[0] is not None:
+        if not row[0]:
+            continue
+
+        try:
 
             student = {
                 "id": str(row[0]),
@@ -144,22 +127,109 @@ def load_students():
 
             students.append(student)
 
+        except (TypeError, ValueError):
+            continue
+
     workbook.close()
 
     return students
 
 
-# ============================================================
-# SAVE STUDENT
-# ============================================================
+def normalize_values(
+    study_hours,
+    previous_semester_gpa,
+    backlogs
+):
+
+    study_hours_score = min(
+        (study_hours / 8) * 100,
+        100
+    )
+
+    gpa_score = min(
+        (previous_semester_gpa / 10) * 100,
+        100
+    )
+
+    backlog_score = max(
+        0,
+        100 - (backlogs * 20)
+    )
+
+    return (
+        study_hours_score,
+        gpa_score,
+        backlog_score
+    )
+
+
+def calculate_score(student):
+
+    (
+        study_hours_score,
+        gpa_score,
+        backlog_score
+    ) = normalize_values(
+        student["study_hours"],
+        student["gpa"],
+        student["backlogs"]
+    )
+
+    score = (
+        student["attendance"] * 0.20 +
+        study_hours_score * 0.15 +
+        student["internal"] * 0.20 +
+        student["assignment"] * 0.15 +
+        gpa_score * 0.20 +
+        backlog_score * 0.10
+    )
+
+    return round(score, 2)
+
+
+def get_risk_level(score):
+
+    if score >= 75:
+        return "LOW DROPOUT RISK", GREEN
+
+    elif score >= 50:
+        return "MEDIUM DROPOUT RISK", ORANGE
+
+    else:
+        return "HIGH DROPOUT RISK", RED
+
+
+def clear_student_form():
+
+    fields = [
+        student_id_entry,
+        student_name_entry,
+        attendance_entry,
+        study_hours_entry,
+        internal_entry,
+        assignment_entry,
+        gpa_entry,
+        backlog_entry
+    ]
+
+    for field in fields:
+
+        if field is not None:
+            field.delete(0, tk.END)
+
 
 def save_student():
 
     try:
 
         student_id = student_id_entry.get().strip()
-
         student_name = student_name_entry.get().strip()
+
+        if student_id == "":
+            raise ValueError("Please enter Student ID.")
+
+        if student_name == "":
+            raise ValueError("Please enter Student Name.")
 
         attendance = float(
             attendance_entry.get()
@@ -184,21 +254,6 @@ def save_student():
         backlogs = int(
             backlog_entry.get()
         )
-
-
-        # ----------------------------------------------------
-        # VALIDATION
-        # ----------------------------------------------------
-
-        if student_id == "":
-            raise ValueError(
-                "Please enter Student ID."
-            )
-
-        if student_name == "":
-            raise ValueError(
-                "Please enter Student Name."
-            )
 
         if not 0 <= attendance <= 100:
             raise ValueError(
@@ -230,11 +285,6 @@ def save_student():
                 "Backlogs cannot be negative."
             )
 
-
-        # ----------------------------------------------------
-        # CREATE / OPEN EXCEL
-        # ----------------------------------------------------
-
         create_excel_file()
 
         workbook = openpyxl.load_workbook(
@@ -243,15 +293,13 @@ def save_student():
 
         sheet = workbook.active
 
-
-        # ----------------------------------------------------
-        # DUPLICATE CHECK
-        # ----------------------------------------------------
-
         for row in sheet.iter_rows(
             min_row=2,
             values_only=True
         ):
+
+            if row[0] is None:
+                continue
 
             existing_id = str(row[0])
 
@@ -266,11 +314,6 @@ def save_student():
 
                 return
 
-
-        # ----------------------------------------------------
-        # SAVE
-        # ----------------------------------------------------
-
         sheet.append([
             student_id,
             student_name,
@@ -283,20 +326,15 @@ def save_student():
         ])
 
         workbook.save(FILE_NAME)
-
         workbook.close()
 
-
         messagebox.showinfo(
-            "Success",
+            "Student Saved",
             f"Student '{student_name}' saved successfully."
         )
 
-
         clear_student_form()
-
         show_student_list()
-
 
     except ValueError as error:
 
@@ -305,33 +343,6 @@ def save_student():
             str(error)
         )
 
-
-# ============================================================
-# CLEAR STUDENT FORM
-# ============================================================
-
-def clear_student_form():
-
-    fields = [
-        student_id_entry,
-        student_name_entry,
-        attendance_entry,
-        study_hours_entry,
-        internal_entry,
-        assignment_entry,
-        gpa_entry,
-        backlog_entry
-    ]
-
-    for field in fields:
-
-        if field is not None:
-            field.delete(0, tk.END)
-
-
-# ============================================================
-# CREATE FIELD
-# ============================================================
 
 def create_field(
     parent,
@@ -353,15 +364,13 @@ def create_field(
         sticky="ew"
     )
 
-    label = tk.Label(
+    tk.Label(
         frame,
         text=label_text,
         font=("Arial", 10, "bold"),
         bg=WHITE,
         fg=GRAY
-    )
-
-    label.pack(
+    ).pack(
         anchor="w"
     )
 
@@ -384,9 +393,61 @@ def create_field(
     return entry
 
 
-# ============================================================
-# DASHBOARD
-# ============================================================
+def create_stat_card(
+    parent,
+    icon,
+    title,
+    value,
+    color
+):
+
+    card = tk.Frame(
+        parent,
+        bg=WHITE,
+        highlightbackground=LIGHT_GRAY,
+        highlightthickness=1
+    )
+
+    card.pack(
+        side="left",
+        fill="both",
+        expand=True,
+        padx=6,
+        ipady=15
+    )
+
+    tk.Label(
+        card,
+        text=icon,
+        font=("Arial", 22),
+        bg=WHITE
+    ).pack(
+        anchor="w",
+        padx=20
+    )
+
+    tk.Label(
+        card,
+        text=title,
+        font=("Arial", 9, "bold"),
+        bg=WHITE,
+        fg=GRAY
+    ).pack(
+        anchor="w",
+        padx=20
+    )
+
+    tk.Label(
+        card,
+        text=str(value),
+        font=("Arial", 22, "bold"),
+        bg=WHITE,
+        fg=color
+    ).pack(
+        anchor="w",
+        padx=20
+    )
+
 
 def show_dashboard():
 
@@ -413,11 +474,6 @@ def show_dashboard():
         else:
             low_risk += 1
 
-
-    # --------------------------------------------------------
-    # TITLE
-    # --------------------------------------------------------
-
     tk.Label(
         content,
         text="Dashboard",
@@ -428,7 +484,6 @@ def show_dashboard():
         anchor="w",
         pady=(5, 5)
     )
-
 
     tk.Label(
         content,
@@ -441,11 +496,6 @@ def show_dashboard():
         pady=(0, 25)
     )
 
-
-    # --------------------------------------------------------
-    # STAT CARDS
-    # --------------------------------------------------------
-
     cards = tk.Frame(
         content,
         bg=BG
@@ -455,7 +505,6 @@ def show_dashboard():
         fill="x"
     )
 
-
     create_stat_card(
         cards,
         "👨‍🎓",
@@ -463,7 +512,6 @@ def show_dashboard():
         total_students,
         PRIMARY
     )
-
 
     create_stat_card(
         cards,
@@ -473,7 +521,6 @@ def show_dashboard():
         RED
     )
 
-
     create_stat_card(
         cards,
         "🟠",
@@ -482,7 +529,6 @@ def show_dashboard():
         ORANGE
     )
 
-
     create_stat_card(
         cards,
         "🟢",
@@ -490,11 +536,6 @@ def show_dashboard():
         low_risk,
         GREEN
     )
-
-
-    # --------------------------------------------------------
-    # WELCOME CARD
-    # --------------------------------------------------------
 
     welcome = tk.Frame(
         content,
@@ -508,7 +549,6 @@ def show_dashboard():
         pady=30
     )
 
-
     tk.Label(
         welcome,
         text="Welcome to Smart Student Analytics 🎓",
@@ -521,12 +561,11 @@ def show_dashboard():
         pady=(25, 10)
     )
 
-
     tk.Label(
         welcome,
         text=(
-            "Save student information first. Saved students will "
-            "appear in the Student List and can then be selected "
+            "Save student information first. "
+            "Only saved students can be selected "
             "for dropout risk prediction."
         ),
         font=("Arial", 11),
@@ -541,73 +580,6 @@ def show_dashboard():
     )
 
 
-# ============================================================
-# STAT CARD
-# ============================================================
-
-def create_stat_card(
-    parent,
-    icon,
-    title,
-    value,
-    color
-):
-
-    card = tk.Frame(
-        parent,
-        bg=WHITE,
-        highlightbackground=LIGHT_GRAY,
-        highlightthickness=1
-    )
-
-    card.pack(
-        side="left",
-        fill="both",
-        expand=True,
-        padx=6,
-        ipady=15
-    )
-
-
-    tk.Label(
-        card,
-        text=icon,
-        font=("Arial", 22),
-        bg=WHITE
-    ).pack(
-        anchor="w",
-        padx=20
-    )
-
-
-    tk.Label(
-        card,
-        text=title,
-        font=("Arial", 9, "bold"),
-        bg=WHITE,
-        fg=GRAY
-    ).pack(
-        anchor="w",
-        padx=20
-    )
-
-
-    tk.Label(
-        card,
-        text=str(value),
-        font=("Arial", 22, "bold"),
-        bg=WHITE,
-        fg=color
-    ).pack(
-        anchor="w",
-        padx=20
-    )
-
-
-# ============================================================
-# STUDENT DETAILS PAGE
-# ============================================================
-
 def show_student_details():
 
     clear_content()
@@ -621,7 +593,6 @@ def show_student_details():
     global gpa_entry
     global backlog_entry
 
-
     tk.Label(
         content,
         text="Student Details",
@@ -632,10 +603,9 @@ def show_student_details():
         anchor="w"
     )
 
-
     tk.Label(
         content,
-        text="Enter student information and save it to the student database.",
+        text="Enter student information and save it to the database.",
         font=("Arial", 11),
         bg=BG,
         fg=GRAY
@@ -643,7 +613,6 @@ def show_student_details():
         anchor="w",
         pady=(5, 20)
     )
-
 
     card = tk.Frame(
         content,
@@ -655,7 +624,6 @@ def show_student_details():
     card.pack(
         fill="x"
     )
-
 
     tk.Label(
         card,
@@ -672,13 +640,11 @@ def show_student_details():
         pady=(25, 15)
     )
 
-
     for col in range(3):
         card.columnconfigure(
             col,
             weight=1
         )
-
 
     student_id_entry = create_field(
         card,
@@ -687,14 +653,12 @@ def show_student_details():
         "Student ID"
     )
 
-
     student_name_entry = create_field(
         card,
         1,
         1,
         "Student Name"
     )
-
 
     attendance_entry = create_field(
         card,
@@ -703,14 +667,12 @@ def show_student_details():
         "Attendance (%)"
     )
 
-
     study_hours_entry = create_field(
         card,
         2,
         0,
         "Study Hours / Day"
     )
-
 
     internal_entry = create_field(
         card,
@@ -719,14 +681,12 @@ def show_student_details():
         "Internal Marks"
     )
 
-
     assignment_entry = create_field(
         card,
         2,
         2,
         "Assignment Marks"
     )
-
 
     gpa_entry = create_field(
         card,
@@ -735,14 +695,12 @@ def show_student_details():
         "Previous Semester GPA"
     )
 
-
     backlog_entry = create_field(
         card,
         3,
         1,
         "Number of Backlogs"
     )
-
 
     button_frame = tk.Frame(
         card,
@@ -755,7 +713,6 @@ def show_student_details():
         columnspan=3,
         pady=25
     )
-
 
     tk.Button(
         button_frame,
@@ -772,7 +729,6 @@ def show_student_details():
         side="left",
         padx=8
     )
-
 
     tk.Button(
         button_frame,
@@ -791,10 +747,6 @@ def show_student_details():
     )
 
 
-# ============================================================
-# STUDENT LIST PAGE
-# ============================================================
-
 def show_student_list():
 
     clear_content()
@@ -809,10 +761,9 @@ def show_student_list():
         anchor="w"
     )
 
-
     tk.Label(
         content,
-        text="Only students saved in student_details.xlsx are displayed here.",
+        text="Students saved in student_details.xlsx",
         font=("Arial", 11),
         bg=BG,
         fg=GRAY
@@ -820,7 +771,6 @@ def show_student_list():
         anchor="w",
         pady=(5, 20)
     )
-
 
     card = tk.Frame(
         content,
@@ -834,10 +784,18 @@ def show_student_list():
         expand=True
     )
 
+    style = ttk.Style()
 
-    # --------------------------------------------------------
-    # TREEVIEW
-    # --------------------------------------------------------
+    style.configure(
+        "Treeview",
+        rowheight=35,
+        font=("Arial", 10)
+    )
+
+    style.configure(
+        "Treeview.Heading",
+        font=("Arial", 10, "bold")
+    )
 
     columns = (
         "id",
@@ -850,13 +808,11 @@ def show_student_list():
         "backlogs"
     )
 
-
     tree = ttk.Treeview(
         card,
         columns=columns,
         show="headings"
     )
-
 
     headings = {
         "id": "Student ID",
@@ -869,7 +825,6 @@ def show_student_list():
         "backlogs": "Backlogs"
     }
 
-
     widths = {
         "id": 100,
         "name": 160,
@@ -880,7 +835,6 @@ def show_student_list():
         "gpa": 100,
         "backlogs": 90
     }
-
 
     for col in columns:
 
@@ -895,7 +849,6 @@ def show_student_list():
             anchor="center"
         )
 
-
     scrollbar = ttk.Scrollbar(
         card,
         orient="vertical",
@@ -906,7 +859,6 @@ def show_student_list():
         yscrollcommand=scrollbar.set
     )
 
-
     tree.pack(
         side="left",
         fill="both",
@@ -915,20 +867,13 @@ def show_student_list():
         pady=15
     )
 
-
     scrollbar.pack(
         side="right",
         fill="y",
         pady=15
     )
 
-
-    # --------------------------------------------------------
-    # LOAD SAVED STUDENTS
-    # --------------------------------------------------------
-
     students = load_students()
-
 
     for student in students:
 
@@ -948,43 +893,12 @@ def show_student_list():
         )
 
 
-# ============================================================
-# CALCULATE SCORE
-# ============================================================
-
-def calculate_score(student):
-
-    study_score, gpa_score, backlog_score = normalize_values(
-        student["study_hours"],
-        student["gpa"],
-        student["backlogs"]
-    )
-
-
-    score = (
-        student["attendance"] * 0.20 +
-        study_score * 0.15 +
-        student["internal"] * 0.20 +
-        student["assignment"] * 0.15 +
-        gpa_score * 0.20 +
-        backlog_score * 0.10
-    )
-
-
-    return round(score, 2)
-
-
-# ============================================================
-# PREDICTION PAGE
-# ============================================================
-
 def show_prediction():
 
     clear_content()
 
     global student_dropdown
     global prediction_result_frame
-
 
     tk.Label(
         content,
@@ -995,7 +909,6 @@ def show_prediction():
     ).pack(
         anchor="w"
     )
-
 
     tk.Label(
         content,
@@ -1008,9 +921,7 @@ def show_prediction():
         pady=(5, 20)
     )
 
-
     students = load_students()
-
 
     if not students:
 
@@ -1026,10 +937,9 @@ def show_prediction():
             pady=30
         )
 
-
         tk.Label(
             empty_card,
-            text="No Saved Students",
+            text="⚠ No Saved Students",
             font=("Arial", 20, "bold"),
             bg=WHITE,
             fg=RED
@@ -1037,12 +947,11 @@ def show_prediction():
             pady=(35, 10)
         )
 
-
         tk.Label(
             empty_card,
             text=(
-                "Please go to Student Details and save a student "
-                "before making a prediction."
+                "Please go to Student Details "
+                "and save a student first."
             ),
             font=("Arial", 11),
             bg=WHITE,
@@ -1051,13 +960,7 @@ def show_prediction():
             pady=(0, 35)
         )
 
-
         return
-
-
-    # --------------------------------------------------------
-    # SELECT STUDENT
-    # --------------------------------------------------------
 
     selection_card = tk.Frame(
         content,
@@ -1070,11 +973,10 @@ def show_prediction():
         fill="x"
     )
 
-
     tk.Label(
         selection_card,
-        text="Select Saved Student",
-        font=("Arial", 13, "bold"),
+        text="🎓 Select Saved Student",
+        font=("Arial", 14, "bold"),
         bg=WHITE,
         fg=TEXT
     ).pack(
@@ -1083,12 +985,10 @@ def show_prediction():
         pady=(25, 8)
     )
 
-
     student_options = [
         f'{student["id"]} - {student["name"]}'
         for student in students
     ]
-
 
     student_dropdown = ttk.Combobox(
         selection_card,
@@ -1098,16 +998,13 @@ def show_prediction():
         width=50
     )
 
-
     student_dropdown.pack(
         anchor="w",
         padx=30,
         pady=5
     )
 
-
     student_dropdown.current(0)
-
 
     tk.Button(
         selection_card,
@@ -1115,6 +1012,8 @@ def show_prediction():
         font=("Arial", 11, "bold"),
         bg=PRIMARY,
         fg=WHITE,
+        activebackground=PRIMARY_DARK,
+        activeforeground=WHITE,
         bd=0,
         padx=25,
         pady=12,
@@ -1126,11 +1025,6 @@ def show_prediction():
         pady=25
     )
 
-
-    # --------------------------------------------------------
-    # RESULT FRAME
-    # --------------------------------------------------------
-
     prediction_result_frame = tk.Frame(
         content,
         bg=WHITE,
@@ -1139,21 +1033,20 @@ def show_prediction():
     )
 
     prediction_result_frame.pack(
-        fill="x",
+        fill="both",
+        expand=True,
         pady=25
     )
-
 
     tk.Label(
         prediction_result_frame,
         text="Prediction Result",
-        font=("Arial", 14, "bold"),
+        font=("Arial", 15, "bold"),
         bg=WHITE,
         fg=TEXT
     ).pack(
         pady=(25, 10)
     )
-
 
     tk.Label(
         prediction_result_frame,
@@ -1166,217 +1059,186 @@ def show_prediction():
     )
 
 
-# ============================================================
-# PREDICT SELECTED SAVED STUDENT
-# ============================================================
-
 def perform_selected_prediction():
 
-    selected = student_dropdown.get()
+    if student_dropdown is None:
+        return
 
+    selected = student_dropdown.get()
 
     if not selected:
 
         messagebox.showwarning(
             "Select Student",
-            "Please select a student."
+            "Please select a saved student."
         )
 
         return
 
-
-    student_id = selected.split(" - ")[0]
-
+    student_id = selected.split(
+        " - ",
+        1
+    )[0]
 
     students = load_students()
 
-
     selected_student = None
-
 
     for student in students:
 
         if student["id"] == student_id:
 
             selected_student = student
-
             break
-
 
     if selected_student is None:
 
         messagebox.showerror(
-            "Error",
-            "Student data could not be found."
+            "Student Not Found",
+            "Saved student data could not be found."
         )
 
         return
-
-
-    # --------------------------------------------------------
-    # CALCULATE
-    # --------------------------------------------------------
 
     score = calculate_score(
         selected_student
     )
 
-
-    # --------------------------------------------------------
-    # RISK
-    # --------------------------------------------------------
-
-    if score >= 75:
-
-        risk = "LOW DROPOUT RISK"
-
-        color = GREEN
-
-    elif score >= 50:
-
-        risk = "MEDIUM DROPOUT RISK"
-
-        color = ORANGE
-
-    else:
-
-        risk = "HIGH DROPOUT RISK"
-
-        color = RED
-
-
-    # --------------------------------------------------------
-    # CLEAR OLD RESULT
-    # --------------------------------------------------------
+    risk, risk_color = get_risk_level(
+        score
+    )
 
     for widget in prediction_result_frame.winfo_children():
-
         widget.destroy()
 
-
-    # --------------------------------------------------------
-    # STUDENT NAME
-    # --------------------------------------------------------
+    tk.Label(
+        prediction_result_frame,
+        text="Prediction Result",
+        font=("Arial", 14, "bold"),
+        bg=WHITE,
+        fg=GRAY
+    ).pack(
+        pady=(20, 5)
+    )
 
     tk.Label(
         prediction_result_frame,
         text=(
-            f'{selected_student["name"]} '
-            f'({selected_student["id"]})'
+            f'{selected_student["name"]}'
+            f'  •  ID: {selected_student["id"]}'
         ),
         font=("Arial", 18, "bold"),
         bg=WHITE,
         fg=TEXT
     ).pack(
-        pady=(25, 5)
+        pady=5
     )
-
-
-    # --------------------------------------------------------
-    # SCORE
-    # --------------------------------------------------------
 
     tk.Label(
         prediction_result_frame,
-        text=f"{score}",
-        font=("Arial", 48, "bold"),
+        text=str(score),
+        font=("Arial", 45, "bold"),
         bg=WHITE,
         fg=PRIMARY
-    ).pack()
+    ).pack(
+        pady=(5, 0)
+    )
 
+    tk.Label(
+        prediction_result_frame,
+        text="Performance Score / 100",
+        font=("Arial", 10),
+        bg=WHITE,
+        fg=GRAY
+    ).pack()
 
     tk.Label(
         prediction_result_frame,
         text=risk,
-        font=("Arial", 20, "bold"),
+        font=("Arial", 19, "bold"),
         bg=WHITE,
-        fg=color
+        fg=risk_color
     ).pack(
         pady=10
     )
 
+    data_frame = tk.Frame(
+        prediction_result_frame,
+        bg="#F8FAFC",
+        highlightbackground=LIGHT_GRAY,
+        highlightthickness=1
+    )
 
-    # --------------------------------------------------------
-    # STUDENT DATA
-    # --------------------------------------------------------
+    data_frame.pack(
+        fill="x",
+        padx=30,
+        pady=10
+    )
 
     data_text = (
-        f'Attendance       : {selected_student["attendance"]}%\n'
-        f'Study Hours      : {selected_student["study_hours"]}\n'
-        f'Internal Marks   : {selected_student["internal"]}\n'
-        f'Assignment Marks : {selected_student["assignment"]}\n'
-        f'Previous GPA     : {selected_student["gpa"]}\n'
-        f'Backlogs         : {selected_student["backlogs"]}'
+        f'Attendance       : '
+        f'{selected_student["attendance"]}%\n\n'
+        f'Study Hours      : '
+        f'{selected_student["study_hours"]} hrs/day\n\n'
+        f'Internal Marks   : '
+        f'{selected_student["internal"]}\n\n'
+        f'Assignment Marks : '
+        f'{selected_student["assignment"]}\n\n'
+        f'Previous GPA     : '
+        f'{selected_student["gpa"]}\n\n'
+        f'Backlogs         : '
+        f'{selected_student["backlogs"]}'
     )
-
 
     tk.Label(
-        prediction_result_frame,
+        data_frame,
         text=data_text,
-        font=("Arial", 11),
-        bg=WHITE,
-        fg=GRAY,
+        font=("Arial", 10),
+        bg="#F8FAFC",
+        fg=TEXT,
         justify="left"
     ).pack(
-        pady=10
+        anchor="w",
+        padx=25,
+        pady=15
     )
-
-
-    # --------------------------------------------------------
-    # IMPROVEMENTS
-    # --------------------------------------------------------
 
     improvements = []
 
-
     if selected_student["attendance"] < 75:
-
         improvements.append(
-            "Improve attendance"
+            "Improve attendance above 75%"
         )
 
-
     if selected_student["study_hours"] < 3:
-
         improvements.append(
             "Increase daily study hours"
         )
 
-
     if selected_student["internal"] < 50:
-
         improvements.append(
-            "Improve internal marks"
+            "Improve internal examination marks"
         )
 
-
     if selected_student["assignment"] < 50:
-
         improvements.append(
             "Complete assignments regularly"
         )
 
-
     if selected_student["gpa"] < 6:
-
         improvements.append(
-            "Improve previous semester GPA"
+            "Work on improving semester GPA"
         )
 
-
     if selected_student["backlogs"] > 0:
-
         improvements.append(
             "Clear pending backlogs"
         )
 
-
     if not improvements:
-
         improvements.append(
             "Student performance is satisfactory."
         )
-
 
     tk.Label(
         prediction_result_frame,
@@ -1387,30 +1249,27 @@ def perform_selected_prediction():
     ).pack(
         anchor="w",
         padx=30,
-        pady=(20, 8)
+        pady=(10, 5)
     )
 
+    improvement_text = "\n".join(
+        "• " + item
+        for item in improvements
+    )
 
     tk.Label(
         prediction_result_frame,
-        text="\n".join(
-            "• " + item
-            for item in improvements
-        ),
-        font=("Arial", 11),
+        text=improvement_text,
+        font=("Arial", 10),
         bg=WHITE,
         fg=GRAY,
         justify="left"
     ).pack(
         anchor="w",
         padx=30,
-        pady=(0, 25)
+        pady=(0, 20)
     )
 
-
-# ============================================================
-# SIDEBAR BUTTON
-# ============================================================
 
 def sidebar_button(
     parent,
@@ -1440,10 +1299,6 @@ def sidebar_button(
         pady=2
     )
 
-
-# ============================================================
-# TOP BAR
-# ============================================================
 
 topbar = tk.Frame(
     root,
@@ -1482,16 +1337,14 @@ tk.Label(
 )
 
 
-# ------------------------------------------------------------
-# EXIT BUTTON
-# ------------------------------------------------------------
-
 tk.Button(
     topbar,
     text="✕  EXIT",
     font=("Arial", 10, "bold"),
     bg=RED,
     fg=WHITE,
+    activebackground="#B91C1C",
+    activeforeground=WHITE,
     bd=0,
     padx=15,
     cursor="hand2",
@@ -1503,16 +1356,14 @@ tk.Button(
 )
 
 
-# ------------------------------------------------------------
-# MAXIMIZE BUTTON
-# ------------------------------------------------------------
-
 maximize_button = tk.Button(
     topbar,
     text="□",
     font=("Arial", 13, "bold"),
     bg="#334155",
     fg=WHITE,
+    activebackground="#475569",
+    activeforeground=WHITE,
     bd=0,
     width=4,
     cursor="hand2",
@@ -1524,10 +1375,6 @@ maximize_button.pack(
     pady=15
 )
 
-
-# ============================================================
-# SIDEBAR
-# ============================================================
 
 sidebar = tk.Frame(
     root,
@@ -1562,13 +1409,11 @@ sidebar_button(
     show_dashboard
 )
 
-
 sidebar_button(
     sidebar,
     "👤   Student Details",
     show_student_details
 )
-
 
 sidebar_button(
     sidebar,
@@ -1576,17 +1421,12 @@ sidebar_button(
     show_student_list
 )
 
-
 sidebar_button(
     sidebar,
     "📊   Risk Prediction",
     show_prediction
 )
 
-
-# ============================================================
-# CONTENT
-# ============================================================
 
 content = tk.Frame(
     root,
@@ -1602,15 +1442,7 @@ content.pack(
 )
 
 
-# ============================================================
-# START
-# ============================================================
-
+create_excel_file()
 show_dashboard()
-
-
-# ============================================================
-# RUN
-# ============================================================
 
 root.mainloop()
