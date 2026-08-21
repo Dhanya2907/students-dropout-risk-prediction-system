@@ -107,3 +107,185 @@ The initial system can use:
 - Assignment Completion Percentage
 - Previous Academic Performance
 - Number of Backlogs
+## **6.6 IDENTIFY SYSTEM OUTPUTS:**
+### **6.6.1 DROPOUT RISK PREDICTION:**
+- Low Risk
+- Medium Risk
+- High Risk
+### **6.6.2 ADDITIONAL OUTPUT:**
+- Prediction probability/score
+- Risk level
+- Key factors affecting dropout risk
+- Recommended actions
+Example:
+
+```text
+Prediction: Low Dropout Risk
+
+Risk Level: Low
+
+Recommendation:
+Maintain regular attendance and
+continue the current academic pattern.
+```
+Another example:
+
+```text
+Prediction: High Dropout Risk
+
+Risk Level: High
+
+Recommendation:
+Student requires academic mentoring,
+attendance monitoring and additional support.
+```
+## **7. SYSTEM DESIGN**
+### **7.1 INPUTS**
+- Student ID
+- Student Name
+- Attendance %
+- Study Hours
+- Internal Marks
+- Assignment Completion %
+- Previous Academic Performance
+- Number of Backlogs
+## **7.2 PROCESSING**
+
+```text
+Validate Input
+      ↓
+Preprocess Data
+      ↓
+Feature Selection
+      ↓
+Send Data to ML Model
+      ↓
+Generate Prediction
+      ↓
+Determine Risk Level
+      ↓
+Generate Recommendation
+```
+## **7.3 OUTPUTS**
+- Predicted dropout risk
+- Risk category
+- Prediction probability
+- Key risk factors
+- Recommendation
+## **8. SYSTEM ARCHITECTURE**
+
+```text
+              Student
+                 ↓
+        Enter Student Details
+                 ↓
+        ┌─────────────────┐
+        │   Tkinter UI    │
+        └─────────────────┘
+                 ↓
+        Input Validation
+                 ↓
+        Data Preprocessing
+                 ↓
+        ┌─────────────────┐
+        │  ML Model (.pkl)│
+        └─────────────────┘
+                 ↓
+        Dropout Prediction
+                 ↓
+        Risk Classification
+                 ↓
+       AI Recommendation Logic
+                 ↓
+        ┌─────────────────┐
+        │   Result Screen │
+        └─────────────────┘
+                 ↓
+       Risk + Recommendation
+```
+## **9. UI DESIGN REQUIREMENTS**
+The application should contain:
+## **9.1 STUDENT INFORMATION SECTION**
+- Student ID
+- Student Name
+## **9.2 ACADEMIC INFORMATION SECTION**
+- Attendance
+- Study Hours
+- Internal Marks
+- Assignment Completion
+- Previous Performance
+- Number of Backlogs
+## **9.3 ACTION SECTION**
+- Predict Dropout Risk
+- Clear
+- Exit
+## **9.4 RESULT SECTION**
+- Predicted Dropout Risk
+- Risk Level
+- Prediction Probability
+- Key Risk Factors
+- Recommendation
+## **10. IMPLEMENTATION (MACHINE LEARNING MODEL DEVELOPMENT)**
+### **10.1 OBJECTIVES**
+- Understand the fundamentals of Machine Learning (ML).
+- Understand the difference between traditional rule-based systems and ML-based systems.
+- Work with datasets using Pandas & NumPy.
+- Perform data preprocessing and feature selection.
+- Train a Machine Learning model for dropout risk prediction.
+- Evaluate model performance using basic metrics.
+- Replace rule-based dropout risk logic with an ML-based prediction system.
+- Prepare the ML model for integration with Tkinter UI.
+- Save the trained model for future predictions.
+### **10.2 OUTCOMES**
+Should complete:
+- Dataset (CSV file)
+- Data preprocessing code
+- Feature selection
+- Trained ML model
+- Accuracy report
+- Confusion matrix
+- Prediction function
+- Saved model file (.pkl)
+- Tkinter integration
+## **10.3 ML WORKFLOW**
+
+```text
+Data Collection
+      ↓
+Data Preprocessing
+      ↓
+Feature Selection
+      ↓
+Train-Test Split
+      ↓
+Model Training
+      ↓
+Model Evaluation
+      ↓
+Prediction
+      ↓
+Save Model (.pkl)
+      ↓
+Integrate with Tkinter
+```
+## **10.4 PROBLEM TYPE**
+For this Project:
+Classification Problem
+Output categories:
+- Low Risk
+- Medium Risk
+- High Risk
+The classification model predicts which dropout-risk category a student belongs to.
+Optional Regression Problem
+Output = Dropout Risk Score (0–100)
+For example:
+
+```text
+0–30   → Low Risk
+31–60  → Medium Risk
+61–100 → High Risk
+```
+## **10.5 MODEL SELECTION**
+###  **Algorithms Introduced**
+   Logistic Regression — Primary
+Used as the main beginner-friendly classification algorithm.
