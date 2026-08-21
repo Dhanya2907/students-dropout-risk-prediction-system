@@ -8,15 +8,7 @@ def get_input():
     backlogs = int(input("Enter the number of backlogs: "))
     exam_performance = int(input("Enter the exam performance percentage: "))
 
-    return (
-        attendance,
-        study_hours,
-        internal_marks,
-        assignment_marks,
-        previous_semester_gpa,
-        backlogs,
-        exam_performance
-    )
+    return (attendance,study_hours,internal_marks,assignment_marks,previous_semester_gpa,backlogs,exam_performance)
 
 
 def normalize_values(study_hours, previous_semester_gpa, backlogs):
@@ -30,16 +22,7 @@ def normalize_values(study_hours, previous_semester_gpa, backlogs):
     return study_hours_score, gpa_score, backlog_score
 
 
-def predict_risk(
-    attendance,
-    study_hours_score,
-    internal_marks,
-    assignment_marks,
-    gpa_score,
-    backlog_score,
-    exam_performance
-):
-
+def predict_risk(attendance,study_hours_score,internal_marks,assignment_marks,gpa_score,backlog_score,exam_performance):
     risk_score = (
         attendance * 0.20 +
         study_hours_score * 0.10 +
@@ -52,26 +35,8 @@ def predict_risk(
 
     return round(risk_score, 2)
 
-
-# Get input
-(
-    attendance,
-    study_hours,
-    internal_marks,
-    assignment_marks,
-    previous_semester_gpa,
-    backlogs,
-    exam_performance
-) = get_input()
-
-
-# Normalize values
-study_hours_score, gpa_score, backlog_score = normalize_values(
-    study_hours,
-    previous_semester_gpa,
-    backlogs
-)
-
+(attendance,study_hours,internal_marks,assignment_marks,previous_semester_gpa,backlogs,exam_performance) = get_input()
+study_hours_score, gpa_score, backlog_score = normalize_values(study_hours,previous_semester_gpa,backlogs)
 result = predict_risk(
     attendance,
     study_hours_score,
@@ -81,9 +46,6 @@ result = predict_risk(
     backlog_score,
     exam_performance
 )
-
-
-print("Risk Score:", result)
 if result >= 75:
     risk_level = "LOW RISK"
 elif result >= 50:
