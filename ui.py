@@ -2,53 +2,28 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import openpyxl
 import os
-
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-
 FILE_NAME = "student_details.xlsx"
-
 BG = "#F4F7FB"
 SIDEBAR = "#172554"
 SIDEBAR_HOVER = "#1E3A8A"
-
 WHITE = "#FFFFFF"
 PRIMARY = "#2563EB"
 PRIMARY_DARK = "#1D4ED8"
-
 TEXT = "#172033"
 GRAY = "#64748B"
 LIGHT_GRAY = "#E2E8F0"
-
 GREEN = "#16A34A"
 ORANGE = "#EA580C"
 RED = "#DC2626"
-
 LIGHT_GREEN = "#DCFCE7"
 LIGHT_ORANGE = "#FFEDD5"
 LIGHT_RED = "#FEE2E2"
-
-
-# ============================================================
-# MAIN WINDOW
-# ============================================================
-
 root = tk.Tk()
-
 root.title("Smart Student Dropout Risk Prediction System")
 root.geometry("1200x750")
 root.minsize(1000, 650)
 root.configure(bg=BG)
-
 is_maximized = False
-
-
-# ============================================================
-# GLOBAL VARIABLES
-# ============================================================
-
 student_id_entry = None
 student_name_entry = None
 attendance_entry = None
@@ -62,12 +37,6 @@ student_list_tree = None
 student_dropdown = None
 
 prediction_result_frame = None
-
-
-# ============================================================
-# WINDOW CONTROLS
-# ============================================================
-
 def toggle_maximize():
 
     global is_maximized
