@@ -1,0 +1,96 @@
+python clean_data.py
+============================================================
+STUDENT DROPOUT DATASET CLEANING
+============================================================
+
+Dataset loaded successfully!
+Rows    : 1500
+Columns : 7
+
+Original Columns:
+['Attendance', 'Study_Hours', 'Internal_Marks', 'Assignment_Marks', 'Previous_Semester_GPA', 'Backlogs', 'Dropout_Risk']
+
+Column names cleaned.
+
+Empty rows removed: 0
+
+Duplicate rows found: 0
+No duplicate rows found.
+
+Checking required columns...
+All required columns are available.
+
+Converting numerical columns...
+Numerical conversion completed.
+
+Checking missing values...
+Attendance: No missing values
+Study_Hours: No missing values
+Internal_Marks: No missing values
+Assignment_Marks: No missing values
+Previous_Semester_GPA: No missing values
+Backlogs: No missing values
+
+Cleaning Dropout_Risk column...
+
+Risk categories:
+Dropout_Risk
+MEDIUM    1099
+HIGH       322
+LOW         79
+Name: count, dtype: int64
+
+Invalid risk values: 0
+No invalid risk values found.
+
+Checking value ranges...
+Range validation completed.
+
+============================================================
+FINAL DATASET CHECK
+============================================================
+
+Rows    : 1500
+Columns : 7
+
+Missing values:
+Attendance               0
+Study_Hours              0
+Internal_Marks           0
+Assignment_Marks         0
+Previous_Semester_GPA    0
+Backlogs                 0
+Dropout_Risk             0
+dtype: int64
+
+Duplicate rows:
+0
+
+============================================================
+DROPOUT RISK DISTRIBUTION
+============================================================
+Dropout_Risk
+MEDIUM    1099
+HIGH       322
+LOW         79
+Name: count, dtype: int64
+
+============================================================
+CLEANING COMPLETED SUCCESSFULLY
+============================================================
+
+Cleaned file saved as:
+cleaned_student_dropout_dataset.csv
+
+First 10 rows:
+   Attendance  Study_Hours  Internal_Marks  Assignment_Marks  Previous_Semester_GPA  Backlogs Dropout_Risk
+0        36.4          3.6            93.4              90.2                    8.4         4       MEDIUM
+1        42.6          2.8            33.1              85.1                    3.5         3         HIGH
+2        36.4          6.2            81.0              67.8                    2.5         2       MEDIUM
+3        70.1          3.7            48.8              35.6                    5.2         4         HIGH
+4        69.1          2.2            74.0              24.1                   10.0         4       MEDIUM
+5        61.7          4.2            68.9              38.2                    9.3         3       MEDIUM
+6        59.2          0.7            40.2              42.3                    8.2         4         HIGH
+7        51.1          0.3            85.4              53.7                    2.9         2         HIGH
+8        84.6          8.1            32.1              40.6                    7.1         0       MEDIUM
+9        36.8          5.5            91.7              99.1                    3.7         1       MEDIUM
