@@ -287,5 +287,84 @@ For example:
 ```
 ## **10.5 MODEL SELECTION**
 ###  **Algorithms Introduced**
-   Logistic Regression — Primary
+###  **Logistic Regression — Primary** 
 Used as the main beginner-friendly classification algorithm.
+### **Decision Tree — Optional**
+Can be used to understand which student factors contribute to the prediction.
+### **Random Forest — Advanced**
+Can be used to improve prediction performance by combining multiple decision trees.
+### **Recommended approach:**
+
+```text
+Logistic Regression
+       ↓
+Evaluate
+       ↓
+Decision Tree
+       ↓
+Compare Results
+       ↓
+Random Forest (Optional)
+```
+## **10.6 MODEL EVALUATION**
+The trained model can be evaluated using:
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Confusion Matrix
+## **Confusion Matrix**
+The confusion matrix helps identify how correctly the model predicts:
+
+```text
+                 Predicted
+              Low  Medium  High
+
+Actual Low     ✓      ✗      ✗
+
+Actual Medium  ✗      ✓      ✗
+
+Actual High    ✗      ✗      ✓
+```
+## **10.7 IMPROVING THE MODEL**
+The model can be improved by:
+- Increasing dataset size
+- Collecting better-quality student data
+- Handling missing values
+- Feature selection
+- Removing irrelevant features
+- Balancing the classes
+- Trying different algorithms
+- Tuning model parameters
+- Comparing multiple ML models
+- Using cross-validation
+- Monitoring model performance
+## **Final Project Flow**
+Your complete project will finally become:
+
+```text
+                    STUDENT
+                       ↓
+              Enter Student Data
+                       ↓
+                 Validate Data
+                       ↓
+               Preprocess Data
+                       ↓
+                ML MODEL (.pkl)
+                       ↓
+              Dropout Prediction
+                       ↓
+        ┌──────────────┼──────────────┐
+        ↓              ↓              ↓
+     LOW RISK      MEDIUM RISK     HIGH RISK
+        ↓              ↓              ↓
+     Normal        Monitoring      Intervention
+        └──────────────┼──────────────┘
+                       ↓
+             AI Recommendation
+                       ↓
+                 Tkinter UI
+                       ↓
+              Display Final Result
+```
