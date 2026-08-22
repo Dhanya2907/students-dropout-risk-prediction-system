@@ -1,0 +1,286 @@
+| Algorithm            |   Accuracy |   Macro F1 | LOW Recall | HIGH Recall |
+| -------------------- | ---------: | ---------: | ---------: | ----------: |
+| Random Forest        |     90.00% |     83.98% |     68.75% |      87.50% |
+| SVM                  |     86.67% |     80.65% |     100%   |    93.75%   |
+| Logistic Regression  |     87.67% |     80.20% |     93.75% |      93.75% |
+| Decision Tree        |     83.00% |     75.76% |     75.00% |      75.00% |
+| KNN                  |     86.00% |     75.58% |     56.25% |      68.75% |
+
+python train_model.py
+=================================================================
+STUDENT DROPOUT RISK - MODEL TRAINING
+=================================================================
+
+Dataset loaded successfully!
+Rows    : 1500
+Columns : 7
+
+Dataset columns:
+- Attendance
+- Study_Hours
+- Internal_Marks
+- Assignment_Marks
+- Previous_Semester_GPA
+- Backlogs
+- Dropout_Risk
+
+=================================================================
+TARGET DISTRIBUTION
+=================================================================
+Dropout_Risk
+MEDIUM    1099
+HIGH       322
+LOW         79
+Name: count, dtype: int64
+
+=================================================================
+TRAIN / TEST SPLIT
+=================================================================
+Training samples: 1200
+Testing samples : 300
+
+Creating Random Forest model...
+Training model...
+Model training completed!
+
+=================================================================
+MODEL ACCURACY
+=================================================================
+Accuracy: 90.00%
+
+=================================================================
+CLASSIFICATION REPORT
+=================================================================
+              precision    recall  f1-score   support
+
+         LOW       0.85      0.69      0.76        16
+      MEDIUM       0.94      0.92      0.93       220
+        HIGH       0.79      0.88      0.83        64
+
+    accuracy                           0.90       300
+   macro avg       0.86      0.83      0.84       300
+weighted avg       0.90      0.90      0.90       300
+
+
+=================================================================
+CONFUSION MATRIX
+=================================================================
+
+             Predicted
+             LOW  MED  HIGH
+--------------------------------
+Actual LOW    11    5     0    
+Actual MEDIUM 2     203   15   
+Actual HIGH   0     8     56   
+
+=================================================================
+FEATURE IMPORTANCE
+=================================================================
+              Feature  Importance
+           Attendance    0.224470
+Previous_Semester_GPA    0.205386
+       Internal_Marks    0.202758
+          Study_Hours    0.163630
+     Assignment_Marks    0.102877
+             Backlogs    0.100879
+
+=================================================================
+MODEL SAVED
+=================================================================
+
+Model file: dropout_risk_model.pkl
+
+=================================================================
+SAMPLE PREDICTIONS
+=================================================================
+
+Student 1
+----------------------------
+Attendance: 90.0
+Study Hours: 8.0
+Internal Marks: 90.0
+Assignment Marks: 90.0
+Previous GPA: 9.0
+Backlogs: 0.0
+Predicted Risk: LOW
+Probabilities:
+  HIGH: 0.00%
+  LOW: 98.49%
+  MEDIUM: 1.51%
+
+Student 2
+----------------------------
+Attendance: 65.0
+Study Hours: 4.0
+Internal Marks: 60.0
+Assignment Marks: 60.0
+Previous GPA: 6.5
+Backlogs: 2.0
+Predicted Risk: MEDIUM
+Probabilities:
+  HIGH: 22.91%
+  LOW: 0.00%
+  MEDIUM: 77.09%
+
+Student 3
+----------------------------
+Attendance: 35.0
+Study Hours: 1.0
+Internal Marks: 35.0
+Assignment Marks: 30.0
+Previous GPA: 3.5
+Backlogs: 5.0
+Predicted Risk: HIGH
+Probabilities:
+  HIGH: 96.58%
+  LOW: 0.00%
+  MEDIUM: 3.42%
+
+=================================================================
+TRAINING COMPLETED SUCCESSFULLY!
+=================================================================
+
+Next step:
+Connect dropout_risk_model.pkl with ai.py / ui.py
+(.venv) PS C:\Users\Admin\python\workshop\mini-project> python train_model.py
+======================================================================
+STUDENT DROPOUT RISK - MODEL COMPARISON
+======================================================================
+
+Dataset loaded successfully!
+Rows    : 1500
+Columns : 7
+
+======================================================================
+TARGET DISTRIBUTION
+======================================================================
+Dropout_Risk
+MEDIUM    1099
+HIGH       322
+LOW         79
+Name: count, dtype: int64
+
+======================================================================
+TRAIN / TEST SPLIT
+======================================================================
+Training samples: 1200
+Testing samples : 300
+
+======================================================================
+TRAINING 5 MACHINE LEARNING ALGORITHMS
+======================================================================
+
+----------------------------------------------------------------------
+Training: Logistic Regression
+----------------------------------------------------------------------
+Accuracy       : 87.67%
+Macro Precision: 74.91%
+Macro Recall   : 90.98%
+Macro F1       : 80.20%
+LOW Recall     : 93.75%
+MEDIUM Recall  : 85.45%
+HIGH Recall    : 93.75%
+
+----------------------------------------------------------------------
+Training: Decision Tree
+----------------------------------------------------------------------
+Accuracy       : 83.00%
+Macro Precision: 73.42%
+Macro Recall   : 78.64%
+Macro F1       : 75.76%
+LOW Recall     : 75.00%
+MEDIUM Recall  : 85.91%
+HIGH Recall    : 75.00%
+
+----------------------------------------------------------------------
+Training: Random Forest
+----------------------------------------------------------------------
+Accuracy       : 90.00%
+Macro Precision: 85.82%
+Macro Recall   : 82.84%
+Macro F1       : 83.98%
+LOW Recall     : 68.75%
+MEDIUM Recall  : 92.27%
+HIGH Recall    : 87.50%
+
+----------------------------------------------------------------------
+Training: KNN
+----------------------------------------------------------------------
+Accuracy       : 86.00%
+Macro Precision: 79.20%
+Macro Recall   : 72.73%
+Macro F1       : 75.58%
+LOW Recall     : 56.25%
+MEDIUM Recall  : 93.18%
+HIGH Recall    : 68.75%
+
+----------------------------------------------------------------------
+Training: SVM
+----------------------------------------------------------------------
+C:\Users\Admin\python\workshop\.venv\Lib\site-packages\sklearn\svm\_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+Accuracy       : 86.67%
+Macro Precision: 74.79%
+Macro Recall   : 92.46%
+Macro F1       : 80.65%
+LOW Recall     : 100.00%
+MEDIUM Recall  : 83.64%
+HIGH Recall    : 93.75%
+
+
+====================================================================================================
+FINAL MODEL COMPARISON
+====================================================================================================
+          Algorithm  Accuracy  Macro_Precision  Macro_Recall  Macro_F1  LOW_Recall  MEDIUM_Recall  HIGH_Recall
+      Random Forest     90.00            85.82         82.84     83.98       68.75          92.27        87.50
+                SVM     86.67            74.79         92.46     80.65      100.00          83.64        93.75
+Logistic Regression     87.67            74.91         90.98     80.20       93.75          85.45        93.75
+      Decision Tree     83.00            73.42         78.64     75.76       75.00          85.91        75.00
+                KNN     86.00            79.20         72.73     75.58       56.25          93.18        68.75
+
+======================================================================
+BEST MODEL
+======================================================================
+
+Selected Algorithm: Random Forest
+Accuracy       : 90.00%
+Macro Precision: 85.82%
+Macro Recall   : 82.84%
+Macro F1       : 83.98%
+LOW Recall     : 68.75%
+MEDIUM Recall  : 92.27%
+HIGH Recall    : 87.50%
+
+======================================================================
+BEST MODEL SAVED
+======================================================================
+
+Model saved as: dropout_risk_model.pkl
+
+======================================================================
+CLASSIFICATION REPORT - BEST MODEL
+======================================================================
+              precision    recall  f1-score   support
+
+         LOW       0.85      0.69      0.76        16
+      MEDIUM       0.94      0.92      0.93       220
+        HIGH       0.79      0.88      0.83        64
+
+    accuracy                           0.90       300
+   macro avg       0.86      0.83      0.84       300
+weighted avg       0.90      0.90      0.90       300
+
+
+======================================================================
+SAMPLE PREDICTION TEST
+======================================================================
+Student 1: LOW
+Student 2: MEDIUM
+Student 3: HIGH
+
+======================================================================
+MODEL COMPARISON COMPLETED SUCCESSFULLY!
+======================================================================
+
+Final selected model: Random Forest
+Saved model: dropout_risk_model.pkl
