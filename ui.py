@@ -1373,10 +1373,29 @@ def show_risk_students(risk_type):
     )
 
 
-    canvas.create_window(
+    # Create the scroll frame inside the canvas.
+    # Keep the inner frame the same width as the visible canvas
+    # so the student cards use the full available page width.
+    scroll_window = canvas.create_window(
         (0, 0),
         window=scroll_frame,
         anchor="nw"
+    )
+
+
+    def resize_scroll_frame(event):
+
+        # Expand the inner frame to the canvas width.
+        # This prevents the risk-student cards from appearing short/narrow.
+        canvas.itemconfigure(
+            scroll_window,
+            width=event.width
+        )
+
+
+    canvas.bind(
+        "<Configure>",
+        resize_scroll_frame
     )
 
 
