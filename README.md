@@ -1,4 +1,3 @@
-# students-dropout-risk-prediction-system
 ## **1. PROBLEM STATEMENT:**
 - Student dropout can be influenced by multiple academic, behavioral, attendance, and personal factors.
 - Faculty and academic coordinators may find it difficult to identify students who are at risk of dropping out at an early stage.
@@ -45,6 +44,10 @@ End
 | Testing                   | Test individual modules and complete system  |
 | Validation                | Check system against requirements            |
 | Demonstration             | Present working capstone                     |
+
+<img width="1536" height="1024" alt="0bb69261-7c47-49a6-944d-870dda55ae46" src="https://github.com/user-attachments/assets/207dd3d0-52fe-4b0a-ad6d-33200039c4d1" />
+
+
 
 ## **5. PROJECT - MODULAR APPLICATION DEVELOPMENT:**
 ### **Create separate functions:**
